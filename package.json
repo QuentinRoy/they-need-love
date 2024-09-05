@@ -1,5 +1,5 @@
 {
-	"name": "mantine-minimal-next-template",
+	"name": "they-need-love",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
@@ -14,9 +14,11 @@
 	"dependencies": {
 		"@dotenvx/dotenvx": "^1.13.2",
 		"@mantine/core": "7.12.2",
+		"@mantine/dates": "^7.12.2",
 		"@mantine/hooks": "7.12.2",
 		"@mantine/vanilla-extract": "7.12.2",
 		"@vanilla-extract/css": "^1.15.3",
+		"dayjs": "^1.11.13",
 		"kysely": "^0.27.4",
 		"next": "14.2.7",
 		"pg": "^8.12.0",

@@ -9,11 +9,12 @@ import {
 import pg from "pg"
 import { Database } from "./schema"
 import { InsertObject } from "kysely"
+import { postgresUrl } from "../env"
 
 const dirname = path.dirname(new URL(import.meta.url).pathname)
 const migrationFolder = path.join(dirname, "migrations")
 
-export class Store {
+class Store {
 	#db: Kysely<Database>
 
 	constructor(postgresUrl: string) {
@@ -32,23 +33,63 @@ export class Store {
 		return migrator.migrateToLatest()
 	}
 
-	getOperations() {
-		return this.#db.selectFrom("operation").selectAll().execute()
+	async getOperations() {
+		let operations = await this.#db
+			.selectFrom("operation")
+			.selectAll()
+			.execute()
+		return operations.map((operation) => ({
+			...operation,
+			id: String(operation.id),
+			creditor: String(operation.creditor),
+		}))
 	}
 
-	addOperation(operation: InsertObject<Database, "operation">) {
-		return this.#db.insertInto("operation").values(operation).execute()
+	async addOperation(
+		operation: Omit<InsertObject<Database, "operation">, "creditor"> & {
+			creditor: string
+		},
+	) {
+		let result = await this.#db
+			.insertInto("operation")
+			.values({ ...operation, creditor: parseInt(operation.creditor, 10) })
+			.returning("id")
+			.executeTakeFirstOrThrow()
+		return { id: String(result.id) }
 	}
 
-	getMembers() {
-		return this.#db.selectFrom("member").selectAll().execute()
+	async getMembers() {
+		let members = await this.#db.selectFrom("member").selectAll().execute()
+		return members.map((member) => ({ ...member, id: String(member.id) }))
 	}
 
-	addMember(member: InsertObject<Database, "member">) {
-		return this.#db.insertInto("member").values(member).execute()
+	async addMember(member: InsertObject<Database, "member">) {
+		await this.#db.insertInto("member").values(member).execute()
+	}
+
+	addSalaryRecord(
+		salary: Omit<InsertObject<Database, "salary">, "member"> & {
+			member: string
+		},
+	) {
+		return this.#db
+			.insertInto("salary")
+			.values({ ...salary, member: parseInt(salary.member, 10) })
+			.execute()
+	}
+
+	async getSalaryRecords() {
+		let records = await this.#db.selectFrom("salary").selectAll().execute()
+		return records.map((record) => ({
+			...record,
+			id: String(record.id),
+			member: String(record.member),
+		}))
 	}
 
 	async destroy() {
 		await this.#db.destroy()
 	}
 }
+
+export const store = new Store(postgresUrl)

@@ -1,7 +1,5 @@
-import { Store } from "../lib/store/store"
-import { postgresUrl } from "../lib/env"
+import { store } from "../lib/store/store"
 
-let store = new Store(postgresUrl)
 let { error, results } = await store.migrateToLatest()
 await store.destroy()
 
