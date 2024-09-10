@@ -10,6 +10,7 @@ import pg from "pg"
 import { Database } from "./schema"
 import { InsertObject } from "kysely"
 import { postgresUrl } from "../env"
+import type { Tagged } from "type-fest"
 
 const dirname = path.dirname(new URL(import.meta.url).pathname)
 const migrationFolder = path.join(dirname, "migrations")
@@ -38,52 +39,57 @@ class Store {
 			.selectFrom("operation")
 			.selectAll()
 			.execute()
-		return operations.map((operation) => ({
-			...operation,
-			id: String(operation.id),
-			creditor: String(operation.creditor),
+		return operations.map(({ id, creditor, ...rest }) => ({
+			...rest,
+			id: id as OperationId,
+			creditorId: creditor as MemberId,
 		}))
 	}
 
 	async addOperation(
 		operation: Omit<InsertObject<Database, "operation">, "creditor"> & {
-			creditor: string
+			creditorId: MemberId
 		},
 	) {
 		let result = await this.#db
 			.insertInto("operation")
-			.values({ ...operation, creditor: parseInt(operation.creditor, 10) })
+			.values({ ...operation, creditor: operation.creditorId })
 			.returning("id")
 			.executeTakeFirstOrThrow()
-		return { id: String(result.id) }
+		return { id: result.id as OperationId }
 	}
 
 	async getMembers() {
 		let members = await this.#db.selectFrom("member").selectAll().execute()
-		return members.map((member) => ({ ...member, id: String(member.id) }))
+		return members.map((member) => ({
+			...member,
+			id: member.id as MemberId,
+		}))
 	}
 
 	async addMember(member: InsertObject<Database, "member">) {
 		await this.#db.insertInto("member").values(member).execute()
 	}
 
-	addSalaryRecord(
+	async addSalaryRecord(
 		salary: Omit<InsertObject<Database, "salary">, "member"> & {
-			member: string
+			memberId: MemberId
 		},
 	) {
-		return this.#db
+		let result = await this.#db
 			.insertInto("salary")
-			.values({ ...salary, member: parseInt(salary.member, 10) })
-			.execute()
+			.values({ ...salary, member: salary.memberId })
+			.returning("id")
+			.executeTakeFirstOrThrow()
+		return { id: result.id as SalaryRecordId }
 	}
 
 	async getSalaryRecords() {
 		let records = await this.#db.selectFrom("salary").selectAll().execute()
-		return records.map((record) => ({
-			...record,
-			id: String(record.id),
-			member: String(record.member),
+		return records.map(({ id, member, ...rest }) => ({
+			...rest,
+			id: id as SalaryRecordId,
+			memberId: member as MemberId,
 		}))
 	}
 
@@ -93,3 +99,12 @@ class Store {
 }
 
 export const store = new Store(postgresUrl)
+
+export type MemberId = Tagged<number, "MemberId">
+export type OperationId = Tagged<number, "OperationId">
+export type SalaryRecordId = Tagged<number, "SalaryRecordId">
+export type Operation = Awaited<ReturnType<typeof store.getOperations>>[number]
+export type Member = Awaited<ReturnType<typeof store.getMembers>>[number]
+export type SalaryRecord = Awaited<
+	ReturnType<typeof store.getSalaryRecords>
+>[number]
