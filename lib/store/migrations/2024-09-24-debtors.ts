@@ -1,4 +1,4 @@
-import { ColumnType, GeneratedAlways } from "kysely"
+import { ColumnType, GeneratedAlways, Kysely } from "kysely"
 
 // Utility type to extract the type of a column from a table type.
 type ForeignKey<
@@ -47,4 +47,34 @@ export interface Database {
 	operation_attachment: OperationAttachmentTable
 	operation_debtor: OperationDebtorTable
 	salary: SalaryTable
+}
+
+export async function up(trx: Kysely<Database>) {
+	await trx.schema
+		.createTable("operation_debtor")
+		.addColumn("operation", "integer", (col) =>
+			col.references("operation.id").notNull(),
+		)
+		.addColumn("debtor", "integer", (col) =>
+			col.references("member.id").notNull(),
+		)
+		.addPrimaryKeyConstraint("operation_debtor_primary_key", [
+			"operation",
+			"debtor",
+		])
+		.execute()
+
+	await trx
+		.insertInto("operation_debtor")
+		.columns(["operation", "debtor"])
+		.expression((eb) =>
+			eb
+				.selectFrom(["operation", "member"])
+				.select(["operation.id as operation", "member.id as debtor"]),
+		)
+		.execute()
+}
+
+export async function down(trx: Kysely<unknown>) {
+	await trx.schema.dropTable("operation_debtor").execute()
 }

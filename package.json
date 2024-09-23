@@ -9,7 +9,8 @@
 		"build": "dotenvx run --convention=nextjs -- next build",
 		"start": "dotenvx run --convention=nextjs -- next start",
 		"lint": "dotenvx run --convention=nextjs -- next lint",
-		"migrate": "dotenvx run --convention=nextjs -- tsx scripts/migrate.ts"
+		"migrate": "dotenvx run --convention=nextjs -- tsx scripts/migrate.ts",
+		"rollback": "dotenvx run --convention=nextjs -- tsx scripts/rollback.ts"
 	},
 	"dependencies": {
 		"@dotenvx/dotenvx": "^1.13.2",

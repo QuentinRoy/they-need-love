@@ -26,12 +26,20 @@ class Store {
 		})
 	}
 
-	migrateToLatest() {
+	async migrateToLatest() {
 		let migrator = new Migrator({
 			db: this.#db,
 			provider: new FileMigrationProvider({ fs, path, migrationFolder }),
 		})
 		return migrator.migrateToLatest()
+	}
+
+	async rollback() {
+		let migrator = new Migrator({
+			db: this.#db,
+			provider: new FileMigrationProvider({ fs, path, migrationFolder }),
+		})
+		return migrator.migrateDown()
 	}
 
 	async getOperations() {
@@ -52,12 +60,23 @@ class Store {
 	}: Omit<InsertObject<Database, "operation">, "creditor"> & {
 		creditorId: MemberId
 	}) {
-		let result = await this.#db
-			.insertInto("operation")
-			.values({ ...operation, creditor: parseId(creditorId) })
-			.returning("id")
-			.executeTakeFirstOrThrow()
-		return { id: encodeOperationId(result.id) }
+		return this.#db.transaction().execute(async (trx) => {
+			let { id: operationId } = await trx
+				.insertInto("operation")
+				.values({ ...operation, creditor: parseId(creditorId) })
+				.returning("id")
+				.executeTakeFirstOrThrow()
+			await trx
+				.insertInto("operation_debtor")
+				.columns(["operation", "debtor"])
+				.expression((eb) =>
+					eb
+						.selectFrom("member")
+						.select([eb.val(operationId).as("operation"), "id"]),
+				)
+				.execute()
+			return { id: encodeOperationId(operationId) }
+		})
 	}
 
 	async getMembers() {
