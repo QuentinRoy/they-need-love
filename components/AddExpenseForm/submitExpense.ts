@@ -3,6 +3,7 @@
 import * as v from "valibot"
 import { store } from "@lib/store/store"
 import { auth } from "@lib/auth"
+import { revalidate } from "@lib/store/cache"
 
 const schema = v.object({
 	title: v.string(),
@@ -10,7 +11,7 @@ const schema = v.object({
 		v.string(),
 		v.transform((x) => parseFloat(x)),
 	),
-	creditor: v.string(),
+	creditorId: v.pipe(v.string(), v.brand("MemberId")),
 	date: v.pipe(
 		v.string(),
 		v.isoTimestamp(),
@@ -41,5 +42,6 @@ export async function submit(data: FormData) {
 		...operation,
 		type: "expense",
 	})
+	revalidate("expenses")
 	return { success: true as const, operationId }
 }

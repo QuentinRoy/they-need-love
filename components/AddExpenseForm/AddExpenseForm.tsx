@@ -10,13 +10,14 @@ import {
 	TextInput,
 } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
-import { submit } from "./submit"
+import { submit } from "./submitExpense"
 import { useRouter } from "next/navigation"
+import { MemberId } from "@lib/store/store"
 
 interface AddExpenseFormValues {
 	title: string
 	amount: string
-	creditor: string
+	creditor: MemberId
 	date: Date
 	description: string
 	attachments: File[]
@@ -24,7 +25,7 @@ interface AddExpenseFormValues {
 
 export namespace AddExpenseForm {
 	export interface Props {
-		creditors: Array<{ name: string; id: string }>
+		creditors: Array<{ name: string; id: MemberId }>
 		initialValues?: Partial<AddExpenseFormValues>
 	}
 }
@@ -54,7 +55,7 @@ export function AddExpenseForm({
 				mt="md"
 			/>
 			<Radio.Group
-				name="creditor"
+				name="creditorId"
 				required
 				defaultValue={initialValues?.creditor}
 				label="Creditor"

@@ -10,7 +10,7 @@ import pg from "pg"
 import { Database } from "./schema"
 import { InsertObject } from "kysely"
 import { postgresUrl } from "../env"
-import type { Tagged } from "type-fest"
+import type { Brand } from "valibot"
 
 const dirname = path.dirname(new URL(import.meta.url).pathname)
 const migrationFolder = path.join(dirname, "migrations")
@@ -41,29 +41,30 @@ class Store {
 			.execute()
 		return operations.map(({ id, creditor, ...rest }) => ({
 			...rest,
-			id: id as OperationId,
-			creditorId: creditor as MemberId,
+			id: encodeOperationId(id),
+			creditorId: encodeMemberId(creditor),
 		}))
 	}
 
-	async addOperation(
-		operation: Omit<InsertObject<Database, "operation">, "creditor"> & {
-			creditorId: MemberId
-		},
-	) {
+	async addOperation({
+		creditorId,
+		...operation
+	}: Omit<InsertObject<Database, "operation">, "creditor"> & {
+		creditorId: MemberId
+	}) {
 		let result = await this.#db
 			.insertInto("operation")
-			.values({ ...operation, creditor: operation.creditorId })
+			.values({ ...operation, creditor: parseId(creditorId) })
 			.returning("id")
 			.executeTakeFirstOrThrow()
-		return { id: result.id as OperationId }
+		return { id: encodeOperationId(result.id) }
 	}
 
 	async getMembers() {
 		let members = await this.#db.selectFrom("member").selectAll().execute()
 		return members.map((member) => ({
 			...member,
-			id: member.id as MemberId,
+			id: encodeMemberId(member.id),
 		}))
 	}
 
@@ -71,25 +72,26 @@ class Store {
 		await this.#db.insertInto("member").values(member).execute()
 	}
 
-	async addSalaryRecord(
-		salary: Omit<InsertObject<Database, "salary">, "member"> & {
-			memberId: MemberId
-		},
-	) {
+	async addSalaryRecord({
+		memberId,
+		...salary
+	}: Omit<InsertObject<Database, "salary">, "member"> & {
+		memberId: MemberId
+	}) {
 		let result = await this.#db
 			.insertInto("salary")
-			.values({ ...salary, member: salary.memberId })
+			.values({ ...salary, member: parseId(memberId) })
 			.returning("id")
 			.executeTakeFirstOrThrow()
-		return { id: result.id as SalaryRecordId }
+		return { id: encodeSalaryId(result.id) }
 	}
 
 	async getSalaryRecords() {
 		let records = await this.#db.selectFrom("salary").selectAll().execute()
 		return records.map(({ id, member, ...rest }) => ({
 			...rest,
-			id: id as SalaryRecordId,
-			memberId: member as MemberId,
+			id: encodeSalaryId(id),
+			memberId: encodeOperationId(member),
 		}))
 	}
 
@@ -98,11 +100,24 @@ class Store {
 	}
 }
 
-export const store = new Store(postgresUrl)
+function parseId(id: string) {
+	try {
+		return parseInt(id)
+	} catch (e) {
+		throw new Error(`Invalid id: ${id}`)
+	}
+}
+function encodeId<Tag extends string>(id: number) {
+	return String(id) as string & Brand<Tag>
+}
+const encodeMemberId = encodeId<"MemberId">
+const encodeOperationId = encodeId<"OperationId">
+const encodeSalaryId = encodeId<"SalaryRecordId">
 
-export type MemberId = Tagged<number, "MemberId">
-export type OperationId = Tagged<number, "OperationId">
-export type SalaryRecordId = Tagged<number, "SalaryRecordId">
+export const store = new Store(postgresUrl)
+export type MemberId = ReturnType<typeof encodeMemberId>
+export type OperationId = ReturnType<typeof encodeOperationId>
+export type SalaryRecordId = ReturnType<typeof encodeSalaryId>
 export type Operation = Awaited<ReturnType<typeof store.getOperations>>[number]
 export type Member = Awaited<ReturnType<typeof store.getMembers>>[number]
 export type SalaryRecord = Awaited<
