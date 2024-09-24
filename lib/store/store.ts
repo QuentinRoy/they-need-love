@@ -7,8 +7,8 @@ import {
 	PostgresDialect,
 } from "kysely"
 import pg from "pg"
-import { Database } from "./schema"
-import { InsertObject } from "kysely"
+import type { Database } from "./schema"
+import type { InsertObject } from "kysely"
 import { postgresUrl } from "../env"
 import type { Brand } from "valibot"
 

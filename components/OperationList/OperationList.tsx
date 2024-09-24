@@ -1,6 +1,6 @@
 "use client"
 
-import { MemberId, Operation } from "@lib/store/store"
+import type { MemberId, Operation } from "@lib/store/store"
 import { Table } from "@mantine/core"
 
 export function OperationList({

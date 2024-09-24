@@ -12,7 +12,7 @@ import {
 import { DateInput } from "@mantine/dates"
 import { submit } from "./submitExpense"
 import { useRouter } from "next/navigation"
-import { MemberId } from "@lib/store/store"
+import type { MemberId } from "@lib/store/store"
 
 interface AddExpenseFormValues {
 	title: string

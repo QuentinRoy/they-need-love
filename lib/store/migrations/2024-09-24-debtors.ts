@@ -1,4 +1,4 @@
-import { ColumnType, GeneratedAlways, Kysely } from "kysely"
+import type { ColumnType, GeneratedAlways, Kysely } from "kysely"
 
 // Utility type to extract the type of a column from a table type.
 type ForeignKey<
