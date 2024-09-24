@@ -1,6 +1,6 @@
 "use client"
 
-import { AppShell, Flex, Title, useMantineTheme } from "@mantine/core"
+import { AppShell, Flex, Title } from "@mantine/core"
 import { IconHeartFilled } from "@tabler/icons-react"
 import * as classes from "./Shell.css"
 
@@ -10,12 +10,11 @@ export const metadata = {
 }
 
 export default function Shell({ children }: { children: any }) {
-	const theme = useMantineTheme()
 	return (
 		<AppShell>
-			<AppShell.Header>
+			<AppShell.Header px="md">
 				<Title order={1}>
-					<Flex justify="center" align="center">
+					<Flex align="center">
 						<div>They Need</div>
 						<IconHeartFilled className={classes.icon} />
 					</Flex>
