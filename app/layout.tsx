@@ -4,8 +4,9 @@ import { theme } from "../theme"
 import Shell from "@components/Shell/Shell"
 
 export const metadata = {
-	title: "Mantine Next.js template",
-	description: "I am using Mantine with Next.js!",
+	title: "They Need Love",
+	description:
+		"A simple app to manage shared expenses for separated couples with children",
 }
 
 export default function RootLayout({ children }: { children: any }) {

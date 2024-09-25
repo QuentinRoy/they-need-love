@@ -3,5 +3,8 @@
 import { createTheme } from "@mantine/core"
 import { themeToVars } from "@mantine/vanilla-extract"
 
-export const theme = createTheme({})
+export const theme = createTheme({
+	cursorType: "pointer",
+	respectReducedMotion: true,
+})
 export const vars = themeToVars(theme)

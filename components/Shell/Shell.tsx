@@ -1,8 +1,9 @@
 "use client"
 
-import { AppShell, Flex, Title } from "@mantine/core"
+import { Anchor, AppShell, Group, Text } from "@mantine/core"
 import { IconHeartFilled } from "@tabler/icons-react"
 import * as classes from "./Shell.css"
+import Link from "next/link"
 
 export const metadata = {
 	title: "Mantine Next.js template",
@@ -11,16 +12,26 @@ export const metadata = {
 
 export default function Shell({ children }: { children: any }) {
 	return (
-		<AppShell>
-			<AppShell.Header px="md">
-				<Title order={1}>
-					<Flex align="center">
-						<div>They Need</div>
+		<AppShell header={{ height: "60" }} padding="md">
+			<AppShell.Header>
+				<Anchor
+					c="inherit"
+					href="/"
+					variant="text"
+					size="lg"
+					fw={700}
+					underline="never"
+					component={Link}
+				>
+					<Group h="100%" px="md" gap="0">
+						They Need&nbsp;
 						<IconHeartFilled className={classes.icon} />
-					</Flex>
-				</Title>
+					</Group>
+				</Anchor>
 			</AppShell.Header>
-			<AppShell.Main>{children}</AppShell.Main>
+			<AppShell.Main bg="var(--mantine-color-gray-light)">
+				{children}
+			</AppShell.Main>
 		</AppShell>
 	)
 }
