@@ -56,25 +56,40 @@ class Store {
 
 	async addOperation({
 		creditorId,
+		attachments,
 		...operation
 	}: Omit<InsertObject<Database, "operation">, "creditor"> & {
 		creditorId: MemberId
+		attachments?: File[]
 	}) {
+		console.log({ attachments })
 		return this.#db.transaction().execute(async (trx) => {
 			let { id: operationId } = await trx
 				.insertInto("operation")
 				.values({ ...operation, creditor: parseId(creditorId) })
 				.returning("id")
 				.executeTakeFirstOrThrow()
-			await trx
-				.insertInto("operation_debtor")
-				.columns(["operation", "debtor"])
-				.expression((eb) =>
-					eb
-						.selectFrom("member")
-						.select([eb.val(operationId).as("operation"), "id"]),
-				)
-				.execute()
+			await Promise.all([
+				trx
+					.insertInto("operation_debtor")
+					.columns(["operation", "debtor"])
+					.expression((eb) =>
+						eb
+							.selectFrom("member")
+							.select([eb.val(operationId).as("operation"), "id"]),
+					)
+					.execute(),
+				...(attachments ?? []).map(async (attachment) =>
+					trx
+						.insertInto("operation_attachment")
+						.values({
+							operation: operationId,
+							name: attachment.name,
+							data: Buffer.from(await attachment.arrayBuffer()),
+						})
+						.execute(),
+				),
+			])
 			return { id: encodeOperationId(operationId) }
 		})
 	}

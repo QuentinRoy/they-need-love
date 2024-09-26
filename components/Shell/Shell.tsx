@@ -29,9 +29,7 @@ export default function Shell({ children }: { children: any }) {
 					</Group>
 				</Anchor>
 			</AppShell.Header>
-			<AppShell.Main bg="var(--mantine-color-gray-light)">
-				{children}
-			</AppShell.Main>
+			<AppShell.Main>{children}</AppShell.Main>
 		</AppShell>
 	)
 }

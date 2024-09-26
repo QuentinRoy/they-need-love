@@ -10,9 +10,10 @@ import {
 	TextInput,
 } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
-import { submit } from "./submitExpense"
-import { useRouter } from "next/navigation"
+import { addExpense } from "./addExpense"
 import type { MemberId } from "@lib/store/store"
+import { useFormState, useFormStatus } from "react-dom"
+import { useMemo } from "react"
 
 interface AddExpenseFormValues {
 	title: string
@@ -34,25 +35,26 @@ export function AddExpenseForm({
 	creditors,
 	initialValues,
 }: AddExpenseForm.Props) {
-	const router = useRouter()
+	const [state, formAction] = useFormState(addExpense, { status: "idle" })
+	const { pending } = useFormStatus()
+
+	let fieldErrors = new Map(
+		state.status === "error" ? state.errors.map((e) => [e.key, e.message]) : [],
+	)
+	let sortedCreditors = useMemo(
+		() => creditors.toSorted((c1, c2) => c1.name.localeCompare(c2.name)),
+		[creditors],
+	)
+
 	return (
-		<form
-			action={(...args) =>
-				submit(...args).then((result) => {
-					if (result.success && result.operationId != null) {
-						router.push("/")
-					} else {
-						throw new Error("Failed to submit form")
-					}
-				})
-			}
-		>
+		<form action={formAction}>
 			<TextInput
 				name="title"
 				required
 				defaultValue={initialValues?.title}
 				label="Title"
 				mt="md"
+				error={fieldErrors.get("title")}
 			/>
 			<Radio.Group
 				name="creditorId"
@@ -61,9 +63,10 @@ export function AddExpenseForm({
 				label="Creditor"
 				description="The person who paid for the expense"
 				mt="md"
+				error={fieldErrors.get("creditorId")}
 			>
 				<Group>
-					{creditors.map((creditor, i) => (
+					{sortedCreditors.map((creditor, i) => (
 						<Radio
 							mt="xs"
 							ml={i === 0 ? undefined : "sm"}
@@ -82,6 +85,7 @@ export function AddExpenseForm({
 				description="Amount of money spent in euros"
 				leftSection="€"
 				mt="md"
+				error={fieldErrors.get("amount")}
 			/>
 			<DateInput
 				name="date"
@@ -89,12 +93,14 @@ export function AddExpenseForm({
 				defaultValue={initialValues?.date ?? new Date()}
 				mt="md"
 				label="Date"
+				error={fieldErrors.get("date")}
 			/>
 			<Textarea
 				name="description"
 				defaultValue={initialValues?.description}
 				mt="md"
 				label="Notes or description"
+				error={fieldErrors.get("description")}
 			/>
 			<FileInput
 				name="attachments"
@@ -106,9 +112,12 @@ export function AddExpenseForm({
 				clearable
 				placeholder="Select file(s)"
 				description="Optional attachments related to the expense, like receipts"
+				error={fieldErrors.get("attachments")}
 			/>
 			<Group justify="flex-end" mt="md">
-				<Button type="submit">Submit</Button>
+				<Button type="submit" loading={pending}>
+					Submit
+				</Button>
 			</Group>
 		</form>
 	)

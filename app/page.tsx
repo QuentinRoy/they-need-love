@@ -1,17 +1,28 @@
+"use client"
+
 import Link from "next/link"
-import { Anchor, Stack } from "@mantine/core"
+import { Button, Card, Container, Grid } from "@mantine/core"
 
 export default function HomePage() {
 	return (
-		<>
-			<Stack>
-				<Anchor href="/expenses/new" component={Link}>
-					Add operation
-				</Anchor>
-				<Anchor href="/expenses" component={Link}>
-					Operation list
-				</Anchor>
-			</Stack>
-		</>
+		<Container>
+			<Grid>
+				<Grid.Col span={12}>
+					<Card shadow="sm" withBorder>
+						You are owned...
+					</Card>
+				</Grid.Col>
+				<Grid.Col span={6}>
+					<Button href="/expenses" component={Link}>
+						See expenses
+					</Button>
+				</Grid.Col>
+				<Grid.Col span={6}>
+					<Button href="/expenses/new" component={Link}>
+						Add expense
+					</Button>
+				</Grid.Col>
+			</Grid>
+		</Container>
 	)
 }
