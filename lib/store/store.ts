@@ -137,7 +137,7 @@ class Store {
 function parseId(id: string) {
 	try {
 		return parseInt(id)
-	} catch (e) {
+	} catch (_e) {
 		throw new Error(`Invalid id: ${id}`)
 	}
 }

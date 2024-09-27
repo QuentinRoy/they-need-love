@@ -1,6 +1,6 @@
 "use client"
 
-import { Anchor, AppShell, Group, Text } from "@mantine/core"
+import { Anchor, AppShell, Group } from "@mantine/core"
 import { IconHeartFilled } from "@tabler/icons-react"
 import * as classes from "./Shell.css"
 import Link from "next/link"
@@ -10,7 +10,7 @@ export const metadata = {
 	description: "I am using Mantine with Next.js!",
 }
 
-export default function Shell({ children }: { children: any }) {
+export default function Shell({ children }: { children: React.ReactNode }) {
 	return (
 		<AppShell header={{ height: "60" }} padding="md">
 			<AppShell.Header>

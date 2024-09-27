@@ -9,7 +9,11 @@ export const metadata = {
 		"A simple app to manage shared expenses for separated couples with children",
 }
 
-export default function RootLayout({ children }: { children: any }) {
+export default function RootLayout({
+	children,
+}: {
+	children: React.ReactNode
+}) {
 	return (
 		<html lang="en">
 			<head>

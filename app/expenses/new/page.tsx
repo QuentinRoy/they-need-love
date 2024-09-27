@@ -2,7 +2,7 @@ import "@mantine/dates/styles.css"
 import { AddExpenseForm } from "../../../components/AddExpenseForm/AddExpenseForm"
 import { Container, Title } from "@mantine/core"
 import { getMembers } from "@lib/store/cache"
-import { authenticate, getUser } from "@lib/auth"
+import { getUser } from "@lib/auth"
 
 export const metadata = {
 	title: "New expense | theyneedlove",

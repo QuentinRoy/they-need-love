@@ -1,3 +1,22 @@
 {
-	"extends": "next/core-web-vitals"
+	"extends": [
+		"next/core-web-vitals",
+		"plugin:@typescript-eslint/recommended",
+		"eslint-config-prettier"
+	],
+	"parser": "@typescript-eslint/parser",
+	"rules": {
+		"prefer-const": "off",
+		"@typescript-eslint/no-namespace": "off",
+		"@typescript-eslint/no-unused-vars": [
+			"error",
+			{
+				"argsIgnorePattern": "^_",
+				"caughtErrors": "all",
+				"caughtErrorsIgnorePattern": "^_",
+				"destructuredArrayIgnorePattern": "^_",
+				"varsIgnorePattern": "^_"
+			}
+		]
+	}
 }
