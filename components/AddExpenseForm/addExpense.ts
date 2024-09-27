@@ -48,7 +48,7 @@ export type AddExpenseState =
 	  }
 
 export async function addExpense(
-	_previousState: unknown,
+	_previousState: AddExpenseState,
 	data: FormData,
 ): Promise<AddExpenseState> {
 	const user = await getUser()

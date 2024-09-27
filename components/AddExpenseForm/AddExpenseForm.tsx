@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo } from "react"
 import {
 	Button,
 	FileInput,
@@ -13,7 +14,6 @@ import { DateInput } from "@mantine/dates"
 import { addExpense } from "./addExpense"
 import type { MemberId } from "@lib/store/store"
 import { useFormState, useFormStatus } from "react-dom"
-import { useMemo } from "react"
 
 interface AddExpenseFormValues {
 	title: string
@@ -36,7 +36,6 @@ export function AddExpenseForm({
 	initialValues,
 }: AddExpenseForm.Props) {
 	const [state, formAction] = useFormState(addExpense, { status: "idle" })
-	const { pending } = useFormStatus()
 
 	let fieldErrors = new Map(
 		state.status === "error" ? state.errors.map((e) => [e.key, e.message]) : [],
@@ -115,10 +114,19 @@ export function AddExpenseForm({
 				error={fieldErrors.get("attachments")}
 			/>
 			<Group justify="flex-end" mt="md">
-				<Button type="submit" loading={pending}>
-					Submit
-				</Button>
+				<SubmitButton />
 			</Group>
 		</form>
+	)
+}
+
+function SubmitButton() {
+	// This hook must be called from a component that is a descendant of a form
+	// element.
+	const { pending: isPending } = useFormStatus()
+	return (
+		<Button type="submit" loading={isPending}>
+			Submit
+		</Button>
 	)
 }
