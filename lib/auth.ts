@@ -1,5 +1,11 @@
 import type { NextRequest } from "next/server"
 import type { Member, Workspace } from "@prisma/client"
+import NextAuth from "next-auth"
+
+
+export const { handlers, signIn, signOut, auth } = NextAuth({
+	providers: [],
+})
 
 export async function getUser(
 	_req?: NextRequest,
