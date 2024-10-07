@@ -12,22 +12,20 @@ import {
 } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { addExpense } from "./addExpense"
-import type { MemberId } from "@lib/store/store"
 import { useFormState, useFormStatus } from "react-dom"
+import type { Member } from "@prisma/client"
+import type { ParsedFormValue } from "./addExpense"
 
-interface AddExpenseFormValues {
-	title: string
-	amount: string
-	creditor: MemberId
-	date: Date
-	description: string
-	attachments: File[]
-}
+type InitialValues = Partial<
+	Omit<ParsedFormValue, "attachments"> & {
+		attachments?: File[]
+	}
+>
 
 export namespace AddExpenseForm {
 	export interface Props {
-		creditors: Array<{ name: string; id: MemberId }>
-		initialValues?: Partial<AddExpenseFormValues>
+		creditors: Array<Member>
+		initialValues?: InitialValues
 	}
 }
 
@@ -48,17 +46,21 @@ export function AddExpenseForm({
 	return (
 		<form action={formAction}>
 			<TextInput
-				name="title"
+				name="name"
 				required
-				defaultValue={initialValues?.title}
+				defaultValue={initialValues?.name}
 				label="Title"
 				mt="md"
-				error={fieldErrors.get("title")}
+				error={fieldErrors.get("name")}
 			/>
 			<Radio.Group
 				name="creditorId"
 				required
-				defaultValue={initialValues?.creditor}
+				defaultValue={
+					initialValues?.creditorId
+						? initialValues.creditorId.toString()
+						: undefined
+				}
 				label="Creditor"
 				description="The person who paid for the expense"
 				mt="md"
@@ -70,7 +72,7 @@ export function AddExpenseForm({
 							mt="xs"
 							ml={i === 0 ? undefined : "sm"}
 							key={creditor.id}
-							value={creditor.id}
+							value={creditor.id.toString()}
 							label={creditor.name}
 						/>
 					))}

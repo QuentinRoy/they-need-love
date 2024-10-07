@@ -1,16 +1,16 @@
 "use client"
 
-import type { MemberId, Operation } from "@lib/store/store"
 import { Table } from "@mantine/core"
+import type { Operation, Member } from "@prisma/client"
 
 export function OperationList({
 	operations,
 	members,
 }: {
 	operations: Operation[]
-	members: Map<MemberId, { name: string }>
+	members: Map<Member["id"], Member>
 }) {
-	function getMemberName(memberId: MemberId) {
+	function getMemberName(memberId: Member["id"]) {
 		let member = members.get(memberId)
 		if (member == null) {
 			throw new Error(`Member not found: ${memberId}`)
@@ -20,7 +20,7 @@ export function OperationList({
 
 	const rows = operations.map((op) => (
 		<Table.Tr key={op.id}>
-			<Table.Td>{op.title}</Table.Td>
+			<Table.Td>{op.name}</Table.Td>
 			<Table.Td>{op.amount}€</Table.Td>
 			<Table.Td>{getMemberName(op.creditorId)}</Table.Td>
 			<Table.Td>{op.description}</Table.Td>
