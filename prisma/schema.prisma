@@ -7,12 +7,20 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Workspace {
+  id         Int         @id @default(autoincrement())
+  members    Member[]
+  operations Operation[]
+}
+
 model Member {
   id                 Int         @id @default(autoincrement())
   name               String
+  workspaceId        Int
   creditedOperations Operation[] @relation("OperationCreditor")
   duedOperations     Operation[] @relation("OperationDebtor")
   salaries           Salary[]
+  workspace          Workspace   @relation(fields: [workspaceId], references: [id])
 }
 
 model Operation {
@@ -23,7 +31,9 @@ model Operation {
   description String?
   date        DateTime
   creditorId  Int
+  workspaceId Int
   creditor    Member                @relation("OperationCreditor", fields: [creditorId], references: [id])
+  workspace   Workspace             @relation(fields: [workspaceId], references: [id])
   debtors     Member[]              @relation("OperationDebtor")
   attachments OperationAttachment[]
 }
