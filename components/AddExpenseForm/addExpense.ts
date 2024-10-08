@@ -84,6 +84,7 @@ export async function addExpense(
 	}
 	let members = await prisma.member.findMany({ select: { id: true } })
 	let data: Prisma.OperationUncheckedCreateInput = {
+		workspaceId: user.workspaceId,
 		...result.output,
 		attachments: { create: result.output.attachments },
 		debtors: { connect: members.map((m) => ({ id: m.id })) },
