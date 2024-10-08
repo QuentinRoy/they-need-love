@@ -2,7 +2,7 @@
 
 import * as v from "valibot"
 import { redirect } from "next/navigation"
-import { getUser } from "@lib/auth"
+import { auth } from "@lib/auth"
 import { getFormDataValues } from "@lib/utils"
 import { prisma } from "@lib/prisma"
 import type { Prisma } from "@prisma/client"
@@ -65,12 +65,20 @@ export async function addExpense(
 	_previousState: AddExpenseState,
 	formData: FormData,
 ): Promise<AddExpenseState> {
-	const user = await getUser()
-	if (user == null) {
+	const session = await auth()
+	if (session == null) {
 		return {
 			status: "error",
 			errors: [
 				{ message: "Authentication is required", key: "$auth" as const },
+			],
+		}
+	}
+	if (session.member == null || session.workspace == null) {
+		return {
+			status: "error",
+			errors: [
+				{ message: "User has no associated member", key: "$auth" as const },
 			],
 		}
 	}
@@ -84,12 +92,15 @@ export async function addExpense(
 		})
 		return { status: "error", errors }
 	}
-	let members = await prisma.member.findMany({ select: { id: true } })
+	let members = await prisma.member.findMany({
+		select: { id: true },
+		where: { workspaceId: session.workspace.id },
+	})
 	let data: Prisma.OperationUncheckedCreateInput = {
-		workspaceId: user.workspaceId,
 		...result.output,
+		workspaceId: session.workspace.id,
 		attachments: { create: result.output.attachments },
-		debtors: { connect: members.map((m) => ({ id: m.id })) },
+		debtors: { connect: members },
 	}
 	await prisma.operation.create({ data })
 
