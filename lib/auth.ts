@@ -39,7 +39,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 			}
 			session.workspace = dbUser.workspace
 			session.member = dbUser.member
-
 			return session
 		},
 	},
