@@ -8,7 +8,7 @@ export function OperationList({
 	members,
 }: {
 	operations: Operation[]
-	members: Map<Member["id"], Member>
+	members: Map<Member["id"], { name: string }>
 }) {
 	function getMemberName(memberId: Member["id"]) {
 		let member = members.get(memberId)

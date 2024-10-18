@@ -19,3 +19,9 @@ export function getFormDataValues(data: FormData) {
 	}
 	return result
 }
+
+export type AssertEqual<T, Expected> = [T] extends [Expected]
+	? [Expected] extends [T]
+		? T
+		: never
+	: never

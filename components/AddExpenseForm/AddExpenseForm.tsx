@@ -2,6 +2,7 @@
 
 import { useMemo } from "react"
 import {
+	Alert,
 	Button,
 	FileInput,
 	Group,
@@ -10,11 +11,12 @@ import {
 	Textarea,
 	TextInput,
 } from "@mantine/core"
+import { IconExclamationCircle } from "@tabler/icons-react"
 import { DateInput } from "@mantine/dates"
 import { addExpense } from "./addExpense"
 import { useFormState, useFormStatus } from "react-dom"
-import type { Member } from "@prisma/client"
-import type { ParsedFormValue } from "./addExpense"
+import type { AddExpenseState, ParsedFormValue } from "./addExpense"
+import type { AssertEqual } from "@/lib/utils"
 
 type InitialValues = Partial<
 	Omit<ParsedFormValue, "attachments"> & {
@@ -24,7 +26,7 @@ type InitialValues = Partial<
 
 export namespace AddExpenseForm {
 	export interface Props {
-		creditors: Array<Member>
+		creditors: Array<{ name: string; id: number }>
 		initialValues?: InitialValues
 	}
 }
@@ -33,18 +35,21 @@ export function AddExpenseForm({
 	creditors,
 	initialValues,
 }: AddExpenseForm.Props) {
-	const [state, formAction] = useFormState(addExpense, { status: "idle" })
-
-	let fieldErrors = new Map(
-		state.status === "error" ? state.errors.map((e) => [e.key, e.message]) : [],
-	)
-	let sortedCreditors = useMemo(
-		() => creditors.toSorted((c1, c2) => c1.name.localeCompare(c2.name)),
-		[creditors],
-	)
+	const { formAction, fieldErrors, otherErrors } = useExpenseForm()
 
 	return (
 		<form action={formAction}>
+			{otherErrors.map((error) => (
+				<Alert
+					my="md"
+					key={error.key}
+					color="red"
+					icon={<IconExclamationCircle />}
+				>
+					{error.message}
+				</Alert>
+			))}
+
 			<TextInput
 				name="name"
 				required
@@ -67,7 +72,7 @@ export function AddExpenseForm({
 				error={fieldErrors.get("creditorId")}
 			>
 				<Group>
-					{sortedCreditors.map((creditor, i) => (
+					{creditors.map((creditor, i) => (
 						<Radio
 							mt="xs"
 							ml={i === 0 ? undefined : "sm"}
@@ -131,4 +136,43 @@ function SubmitButton() {
 			Submit
 		</Button>
 	)
+}
+
+const fields = new Set([
+	"name",
+	"amount",
+	"creditorId",
+	"date",
+	"description",
+	"attachments",
+] as const)
+type FormValueKey = keyof ParsedFormValue
+type Field = typeof fields extends Set<infer T>
+	? AssertEqual<T, Exclude<FormValueKey, "type">>
+	: never
+
+function useErrors(state: AddExpenseState) {
+	let stateErrors = state.status === "error" ? state.errors : null
+	return useMemo(() => {
+		let fieldErrors = new Map<Field, string>()
+		let otherErrors: Array<{ key: string | null; message: string }> = []
+		for (let error of stateErrors ?? []) {
+			if (isField(error.key)) {
+				fieldErrors.set(error.key, error.message)
+			} else {
+				otherErrors.push(error)
+			}
+		}
+		return { fieldErrors, otherErrors }
+	}, [stateErrors])
+}
+
+function isField(key: unknown): key is Field {
+	return (fields as Set<unknown>).has(key)
+}
+
+function useExpenseForm() {
+	const [state, formAction] = useFormState(addExpense, { status: "idle" })
+	const { fieldErrors, otherErrors } = useErrors(state)
+	return { formAction, fieldErrors, otherErrors }
 }

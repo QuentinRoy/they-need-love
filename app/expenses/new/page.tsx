@@ -12,6 +12,7 @@ export const metadata = {
 export default async function AddExpensePage() {
 	let creditors = await prisma.member.findMany({
 		select: { id: true, name: true },
+		orderBy: { name: "desc" },
 	})
 	let user = await getUser()
 	return (

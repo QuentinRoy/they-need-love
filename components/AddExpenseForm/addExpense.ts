@@ -76,10 +76,12 @@ export async function addExpense(
 	}
 	let result = await v.safeParseAsync(schema, getFormDataValues(formData))
 	if (!result.success) {
-		let errors = result.issues.map((issue) => ({
-			message: issue.message,
-			key: issue.path?.[0].key as keyof ParsedFormValue | null,
-		}))
+		let errors = result.issues.map((issue) => {
+			return {
+				message: issue.message,
+				key: issue.path?.[0].key as keyof ParsedFormValue | null,
+			}
+		})
 		return { status: "error", errors }
 	}
 	let members = await prisma.member.findMany({ select: { id: true } })
