@@ -17,8 +17,10 @@ export default async function AddExpensePage() {
 	let session = await auth()
 	let member = session?.member
 	return (
-		<Container my="sm" size="xs">
-			<Title order={1}>New expense</Title>
+		<Container size="xs">
+			<Title order={1} mb="md">
+				New expense
+			</Title>
 			<AddExpenseForm
 				creditors={creditors}
 				initialValues={{ creditorId: member?.id }}

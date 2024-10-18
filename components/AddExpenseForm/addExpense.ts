@@ -74,11 +74,11 @@ export async function addExpense(
 			],
 		}
 	}
-	if (session.member == null || session.workspace == null) {
+	if (session.workspace == null) {
 		return {
 			status: "error",
 			errors: [
-				{ message: "User has no associated member", key: "$auth" as const },
+				{ message: "User has no associated workspace", key: "$auth" as const },
 			],
 		}
 	}

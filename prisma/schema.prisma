@@ -12,6 +12,7 @@ model Workspace {
   members    Member[]
   users      User[]
   operations Operation[]
+  name       String
 }
 
 model Member {

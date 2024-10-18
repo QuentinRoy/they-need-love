@@ -1,7 +1,9 @@
 import NextAuth, { type DefaultSession } from "next-auth"
+import Resend from "next-auth/providers/resend"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "./prisma"
 import type { Workspace, Member } from "@prisma/client"
+import * as env from "@lib/env"
 
 declare module "next-auth" {
 	/**
@@ -24,7 +26,12 @@ declare module "next-auth" {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
 	adapter: PrismaAdapter(prisma),
-	providers: [],
+	providers: [
+		Resend({ apiKey: env.resendApiKey, from: env.magicLinkEmailFrom }),
+	],
+	pages: {
+		signIn: "/sign-in",
+	},
 	callbacks: {
 		async session({ session, user }) {
 			let dbUser = await prisma.user.findUnique({

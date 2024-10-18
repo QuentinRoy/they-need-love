@@ -11,10 +11,10 @@ import {
 	Textarea,
 	TextInput,
 } from "@mantine/core"
+import { useFormState, useFormStatus } from "react-dom"
 import { IconExclamationCircle } from "@tabler/icons-react"
 import { DateInput } from "@mantine/dates"
 import { addExpense } from "./addExpense"
-import { useFormState, useFormStatus } from "react-dom"
 import type { AddExpenseState, ParsedFormValue } from "./addExpense"
 import type { AssertEqual } from "@/lib/utils"
 
@@ -41,7 +41,7 @@ export function AddExpenseForm({
 		<form action={formAction}>
 			{otherErrors.map((error) => (
 				<Alert
-					my="md"
+					mb="md"
 					key={error.key}
 					color="red"
 					icon={<IconExclamationCircle />}
@@ -55,7 +55,6 @@ export function AddExpenseForm({
 				required
 				defaultValue={initialValues?.name}
 				label="Title"
-				mt="md"
 				error={fieldErrors.get("name")}
 			/>
 			<Radio.Group
