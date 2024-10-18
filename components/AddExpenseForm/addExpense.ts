@@ -101,6 +101,7 @@ export async function addExpense(
 		workspaceId: session.workspace.id,
 		attachments: { create: result.output.attachments },
 		debtors: { connect: members },
+		creatorId: session.user.id,
 	}
 	await prisma.operation.create({ data })
 

@@ -39,6 +39,8 @@ model Operation {
   workspace   Workspace             @relation(fields: [workspaceId], references: [id])
   debtors     Member[]              @relation("OperationDebtor")
   attachments OperationAttachment[]
+  creator     User?                 @relation(fields: [creatorId], references: [id])
+  creatorId   String?
 }
 
 model OperationAttachment {
@@ -70,10 +72,11 @@ model User {
   Authenticator Authenticator[]
   member        Member?
 
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
-  workspaceId Int?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  workspace         Workspace?  @relation(fields: [workspaceId], references: [id])
+  workspaceId       Int?
+  createdOperations Operation[]
 }
 
 model Account {
