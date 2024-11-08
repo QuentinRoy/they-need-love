@@ -12,13 +12,13 @@ export default function HomePage() {
 					<Card shadow="sm">You are owned...</Card>
 				</Grid.Col>
 				<Grid.Col span={6}>
-					<Button href="/expenses" component={Link}>
-						See expenses
+					<Button href="/operations" component={Link}>
+						See operations
 					</Button>
 				</Grid.Col>
 				<Grid.Col span={6}>
-					<Button href="/expenses/new" component={Link}>
-						Add expense
+					<Button href="/operations/new-expense" component={Link}>
+						Add new expense
 					</Button>
 				</Grid.Col>
 			</Grid>

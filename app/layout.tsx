@@ -9,13 +9,12 @@ export const metadata = {
 		"A simple app to manage shared expenses for separated couples with children",
 }
 
-export default function RootLayout({
-	children,
-}: {
+interface RootLayoutProps {
 	children: React.ReactNode
-}) {
+}
+export default function RootLayout({ children }: RootLayoutProps) {
 	return (
-		<html lang="en">
+		<html suppressHydrationWarning lang="en">
 			<head>
 				<ColorSchemeScript />
 				<link rel="shortcut icon" href="/favicon.svg" />
