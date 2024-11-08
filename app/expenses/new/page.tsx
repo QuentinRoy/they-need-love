@@ -1,8 +1,8 @@
 import "@mantine/dates/styles.css"
 import { AddExpenseForm } from "../../../components/AddExpenseForm/AddExpenseForm"
 import { Container, Title } from "@mantine/core"
-import { getUser } from "@lib/auth"
 import { prisma } from "@lib/prisma"
+import { auth } from "@lib/auth"
 
 export const metadata = {
 	title: "New expense | theyneedlove",
@@ -14,13 +14,16 @@ export default async function AddExpensePage() {
 		select: { id: true, name: true },
 		orderBy: { name: "desc" },
 	})
-	let user = await getUser()
+	let session = await auth()
+	let member = session?.member
 	return (
-		<Container my="sm" size="xs">
-			<Title order={1}>New expense</Title>
+		<Container size="xs">
+			<Title order={1} mb="md">
+				New expense
+			</Title>
 			<AddExpenseForm
 				creditors={creditors}
-				initialValues={{ creditorId: user?.id }}
+				initialValues={{ creditorId: member?.id }}
 			/>
 		</Container>
 	)

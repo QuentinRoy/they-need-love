@@ -6,8 +6,9 @@ import * as classes from "./Shell.css"
 import Link from "next/link"
 
 export const metadata = {
-	title: "Mantine Next.js template",
-	description: "I am using Mantine with Next.js!",
+	title: "They Need Love",
+	description:
+		"A small application for separated parents to manage shared expenses about their children",
 }
 
 export default function Shell({ children }: { children: React.ReactNode }) {

@@ -1,14 +1,52 @@
-import type { NextRequest } from "next/server"
-import type { Member, Workspace } from "@prisma/client"
+import NextAuth, { type DefaultSession } from "next-auth"
+import Resend from "next-auth/providers/resend"
+import { PrismaAdapter } from "@auth/prisma-adapter"
+import { prisma } from "./prisma"
+import type { Workspace, Member } from "@prisma/client"
+import * as env from "@lib/env"
 
-export async function getUser(
-	_req?: NextRequest,
-): Promise<{ id: Member["id"]; workspaceId: Workspace["id"] } | null> {
-	console.warn("getUser is not implemented")
-	return { id: 1, workspaceId: 1 }
+declare module "next-auth" {
+	/**
+	 * Returned by `auth`, `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
+	 */
+	interface Session {
+		member?: { id: Member["id"] } | null
+		workspace?: { id: Workspace["id"] } | null
+		user: {
+			/** The user's postal address. */
+			/**
+			 * By default, TypeScript merges new interface properties and overwrites existing ones.
+			 * In this case, the default session user properties will be overwritten,
+			 * with the new ones defined above. To keep the default session user properties,
+			 * you need to add them back into the newly declared interface.
+			 */
+		} & DefaultSession["user"]
+	}
 }
 
-export async function authenticate(_req?: NextRequest) {
-	console.warn("authenticate is not implemented")
-	return true
-}
+export const { handlers, signIn, signOut, auth } = NextAuth({
+	adapter: PrismaAdapter(prisma),
+	providers: [
+		Resend({ apiKey: env.resendApiKey, from: env.magicLinkEmailFrom }),
+	],
+	pages: {
+		signIn: "/sign-in",
+	},
+	callbacks: {
+		async session({ session, user }) {
+			let dbUser = await prisma.user.findUnique({
+				where: { id: user.id },
+				select: {
+					member: { select: { id: true } },
+					workspace: { select: { id: true } },
+				},
+			})
+			if (dbUser == null) {
+				throw new Error(`User not found: ${user.id}`)
+			}
+			session.workspace = dbUser.workspace
+			session.member = dbUser.member
+			return session
+		},
+	},
+})
