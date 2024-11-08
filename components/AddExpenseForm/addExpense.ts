@@ -105,7 +105,7 @@ export async function addExpense(
 	}
 	await prisma.operation.create({ data })
 
-	redirect("/expenses")
+	redirect("/operations")
 }
 
 async function fileToAttachment(file: File) {

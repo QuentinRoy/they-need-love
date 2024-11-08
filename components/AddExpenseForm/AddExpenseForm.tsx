@@ -1,6 +1,7 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useActionState } from "react"
+import Form from "next/form"
 import {
 	Alert,
 	Button,
@@ -11,7 +12,7 @@ import {
 	Textarea,
 	TextInput,
 } from "@mantine/core"
-import { useFormState, useFormStatus } from "react-dom"
+import { useFormStatus } from "react-dom"
 import { IconExclamationCircle } from "@tabler/icons-react"
 import { DateInput } from "@mantine/dates"
 import { addExpense } from "./addExpense"
@@ -38,7 +39,7 @@ export function AddExpenseForm({
 	const { formAction, fieldErrors, otherErrors } = useExpenseForm()
 
 	return (
-		<form action={formAction}>
+		<Form action={formAction}>
 			{otherErrors.map((error) => (
 				<Alert
 					mb="md"
@@ -122,7 +123,7 @@ export function AddExpenseForm({
 			<Group justify="flex-end" mt="md">
 				<SubmitButton />
 			</Group>
-		</form>
+		</Form>
 	)
 }
 
@@ -150,6 +151,10 @@ type Field = typeof fields extends Set<infer T>
 	? AssertEqual<T, Exclude<FormValueKey, "type">>
 	: never
 
+function isField(key: unknown): key is Field {
+	return (fields as Set<unknown>).has(key)
+}
+
 function useErrors(state: AddExpenseState) {
 	let stateErrors = state.status === "error" ? state.errors : null
 	return useMemo(() => {
@@ -166,12 +171,8 @@ function useErrors(state: AddExpenseState) {
 	}, [stateErrors])
 }
 
-function isField(key: unknown): key is Field {
-	return (fields as Set<unknown>).has(key)
-}
-
 function useExpenseForm() {
-	const [state, formAction] = useFormState(addExpense, { status: "idle" })
+	const [state, formAction] = useActionState(addExpense, { status: "idle" })
 	const { fieldErrors, otherErrors } = useErrors(state)
 	return { formAction, fieldErrors, otherErrors }
 }
